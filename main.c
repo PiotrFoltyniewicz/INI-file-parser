@@ -68,21 +68,61 @@ Requirements for 5.0
 
 struct Tuple{
   char* key;
-  char* value;
+  char *value;
 };
+
 struct Section{
   char* sectionName;
   struct Tuple* arrayOfTuples;
 };
 
+enum Flag{
+  NONE,
+  SECTIONNAME,
+  KEY,
+  VALUE
+};
+
+void flushString(char* buffer){
+  int length = strlen(buffer);
+  for(int i = 0; i < length; i++){
+    buffer[i] = NULL;
+  }
+}
+
+int charValidity(char c){
+  if(isalnum(c) || c == '-'){
+    return 1;
+  }
+  return 0;
+}
+
+void resizeString(char* str){
+  // TODO
+}
+
 struct Section* parseFile(char* filename){
   struct Section* output;
   FILE* file = fopen(filename, "r");
-  char* buffer = malloc(sizeof(char));
-  while(!eof(file)){
-    int flags = 0;
+  enum Flag flag = NONE;
+  char* currentSectionName = malloc(sizeof(char));
+  struct Tuple* currentTuples;
+
+  while(!feof(file)){
     char c = fgetc(file);
+    // handling comments
     if(c == ';'){
+      while(fgetc(file) != '\n');
+    }else if(c == '['){
+      // adding everything from section to structure
+      /*
+        TODO
+      */
+      flag = SECTIONNAME;
+      do{
+        // resize string add c to currentSectionName
+        c = fgetc(file);
+      }while(c != ']');
       
     }
   }
