@@ -108,6 +108,8 @@ struct Section* parseFile(char* filename){
   char* currentSectionName = malloc(sizeof(char));
   struct Tuple* currentTuples;
 
+  // jednak zrobić odczytywanie liniami
+
   while(!feof(file)){
     char c = fgetc(file);
     // handling comments
