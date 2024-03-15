@@ -66,72 +66,139 @@ Requirements for 5.0
         In such cases, an error message should be displayed.
 */
 
-struct Tuple{
-  char* key;
+struct Tuple
+{
+  char *key;
   char *value;
 };
 
-struct Section{
-  char* sectionName;
-  struct Tuple* arrayOfTuples;
+struct Section
+{
+  char *sectionName;
+  struct Tuple *arrayOfTuples;
+  int numTuples;
 };
 
-enum Flag{
+enum Flag
+{
   NONE,
   SECTIONNAME,
   KEY,
   VALUE
 };
 
-void flushString(char* buffer){
+void flushString(char *buffer)
+{
   int length = strlen(buffer);
-  for(int i = 0; i < length; i++){
+  for (int i = 0; i < length; i++)
+  {
     buffer[i] = NULL;
   }
 }
 
-int charValidity(char c){
-  if(isalnum(c) || c == '-'){
+int charValidity(char c)
+{
+  if (isalnum(c) || c == '-')
+  {
     return 1;
   }
   return 0;
 }
 
-void resizeString(char* str){
+void resizeString(char *str)
+{
   // TODO
 }
 
-struct Section* parseFile(char* filename){
-  struct Section* output;
-  FILE* file = fopen(filename, "r");
-  enum Flag flag = NONE;
-  char* currentSectionName = malloc(sizeof(char));
-  struct Tuple* currentTuples;
+struct Section *parseFile(char *filename)
+{
+  int sectionIndex = 0;
+  FILE *file = fopen(filename, "r");
+  char *line = NULL;
+  size_t len = 0;
+  // TODO change to realocate memory
+  char *currentKey = malloc(sizeof(char) * 300);
+  char *currentValue = malloc(sizeof(char) * 300);
+  char *currentSectionName = malloc(sizeof(char) * 300);
+  struct Section *sections = malloc(sizeof(struct Section));
 
-  // jednak zrobić odczytywanie liniami
+  if (file == NULL)
+    exit(EXIT_FAILURE);
 
-  while(!feof(file)){
-    char c = fgetc(file);
-    // handling comments
-    if(c == ';'){
-      while(fgetc(file) != '\n');
-    }else if(c == '['){
-      // adding everything from section to structure
-      /*
-        TODO
-      */
-      flag = SECTIONNAME;
-      do{
-        // resize string add c to currentSectionName
-        c = fgetc(file);
-      }while(c != ']');
-      
+  while (getline(&line, &len, file) != -1)
+  {
+    // skip comment line
+    if (line[0] == ';')
+      ;
+    // getting sections
+    else if (sscanf(line, "[%[^]]", currentSectionName) == 1)
+    {
+      sections = realloc(sections, (sectionIndex + 1) * sizeof(struct Section));
+
+      if (sections == NULL)
+      {
+        fclose(file);
+        return NULL;
+      }
+      sections[sectionIndex].sectionName = strdup(currentSectionName);
+      sections[sectionIndex].arrayOfTuples = NULL;
+      sections[sectionIndex].numTuples = 0;
+      sectionIndex++;
+    }
+    else if (sectionIndex > 0 && (sscanf(line, "%[^ =] = %[^\n]", currentKey, currentValue) == 2))
+    {
+      sections[sectionIndex - 1].arrayOfTuples = realloc(sections[sectionIndex - 1].arrayOfTuples,
+                                                         (sections[sectionIndex - 1].numTuples + 1) * sizeof(struct Tuple));
+      int currentTuple = sections[sectionIndex - 1].numTuples;
+      sections[sectionIndex - 1].arrayOfTuples[currentTuple].key = strdup(currentKey);
+      sections[sectionIndex - 1].arrayOfTuples[currentTuple].value = strdup(currentValue);
+      sections[sectionIndex - 1].numTuples++;
     }
   }
+
   fclose(file);
+  if (line)
+    free(line);
+  return sections;
 }
 
-int main(int argc, char *argv[]){
-  struct Section* data = parseFile(argv[1]);
-  return 0;  
+char *getValue(struct Section *data, char *sectionKey)
+{
+  char *section = strtok(sectionKey, ".");
+  char *key = strtok(NULL, ".");
+  printf("Looking for: %s %s \n", section, key);
+  for (int i = 0; i < 14; i++)
+  {
+    if (strcmp(data[i].sectionName, section) == 0)
+    {
+      for (int j = 0; j < data[i].numTuples; j++)
+      {
+        if (strcmp(data[i].arrayOfTuples[j].key, key) == 0)
+        {
+          return data[i].arrayOfTuples[j].value;
+        }
+      }
+    }
+  };
+  return "key not found";
+}
+
+int main(int argc, char *argv[])
+{
+  struct Section *data = parseFile(argv[1]);
+  for (int i = 0; i < 14; i++)
+  {
+    printf("section:%d %s \n", i, data[i].sectionName);
+    for (int j = 0; j < data[i].numTuples; j++)
+    {
+      printf("key :%s value: %s \n", data[i].arrayOfTuples[j].key, data[i].arrayOfTuples[j].value);
+    }
+  };
+  if (argv[2])
+  {
+    printf("\n-----------\n");
+    printf("value: %s", getValue(data, argv[2]));
+  };
+
+  return 0;
 }
