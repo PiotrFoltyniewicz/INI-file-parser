@@ -139,7 +139,7 @@ char *evaluate(struct Section* data, int dataLength, char* expression){
   char* key2 = malloc(sizeof(char) * strlen(expression));;
   char operator;
   
-  if(sscanf(expression, "%[^ ] %c %[^ ]", key1, &operator, key2) == 3){
+  if(sscanf(expression, "%s %c %s", key1, &operator, key2) == 3){
     char* value1 = getValue(data, dataLength, key1);
     char* value2 = getValue(data, dataLength, key2);
 
@@ -173,7 +173,7 @@ char *evaluate(struct Section* data, int dataLength, char* expression){
       return output;
     }
     else if(!isnumber(value1) && !isnumber(value2)){
-      char* output = malloc(sizeof(char) * strlen(expression));
+      char* output = malloc(sizeof(char) * strlen(expression) + 1);
       if(operator == '+'){
         output = strcat(value1, value2);
       }
