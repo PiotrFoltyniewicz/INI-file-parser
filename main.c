@@ -140,8 +140,8 @@ char *evaluate(struct Section* data, int dataLength, char* expression){
   char operator;
   
   if(sscanf(expression, "%s %c %s", key1, &operator, key2) == 3){
-    char* value1 = strdup(getValue(data, dataLength, key1));
-    char* value2 = strdup(getValue(data, dataLength, key2));
+    char* value1 = getValue(data, dataLength, key1);
+    char* value2 = getValue(data, dataLength, key2);
 
     if(isnumber(value1) && isnumber(value2)){
       char* stopStr;
@@ -166,8 +166,6 @@ char *evaluate(struct Section* data, int dataLength, char* expression){
         strcpy(output, "Invalid operator for integers.\n");
         break;
       }
-      free(value1);
-      free(value2);
       free(key1);
       free(key2);
       return output;
@@ -182,15 +180,11 @@ char *evaluate(struct Section* data, int dataLength, char* expression){
       else{
         strcpy(output, "Invalid operator for strings.\n");
       }
-      free(value1);
-      free(value2);
       free(key1);
       free(key2);
       return output;
     }
     else{
-      free(value1);
-      free(value2);
       free(key1);
       free(key2);
       char* output = malloc(sizeof(char) * 64);
@@ -226,16 +220,14 @@ int main(int argc, char *argv[])
       continue;
     }
     if(expressionFlag == 0){
-      char* result = getValue(data, *dataLength, argv[i]);
-      printf("Value: %s\n", result);
-      free(result);
+      printf("Value: %s\n", getValue(data, *dataLength, argv[i]));
     }
     else if(expressionFlag == 1){
-      char* result = evaluate(data, *dataLength, argv[i]);
       printf("Evaluating: %s\n", argv[i]);
+      char* result = evaluate(data, *dataLength, argv[i]);
       printf("Value of expression: %s\n", result);
-      expressionFlag = 0;
       free(result);
+      expressionFlag = 0;
     }
   }
   freeData(data, *dataLength);
