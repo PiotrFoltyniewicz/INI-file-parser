@@ -140,8 +140,8 @@ char *evaluate(struct Section* data, int dataLength, char* expression){
   char operator;
   
   if(sscanf(expression, "%s %c %s", key1, &operator, key2) == 3){
-    char* value1 = getValue(data, dataLength, key1);
-    char* value2 = getValue(data, dataLength, key2);
+    char* value1 = strdup(getValue(data, dataLength, key1));
+    char* value2 = strdup(getValue(data, dataLength, key2));
 
     if(isnumber(value1) && isnumber(value2)){
       char* stopStr;
@@ -166,24 +166,25 @@ char *evaluate(struct Section* data, int dataLength, char* expression){
         strcpy(output, "Invalid operator for integers.\n");
         break;
       }
-      free(key1);
-      free(key2);
       free(value1);
       free(value2);
+      free(key1);
+      free(key2);
       return output;
     }
     else if(!isnumber(value1) && !isnumber(value2)){
-      char* output = malloc(sizeof(char) * strlen(expression) + 1);
+      int bufferSize = (strlen(value1) + strlen(value2)) + 1 > 32 ? (strlen(value1) + strlen(value2)) : 32;
+      char* output = malloc(sizeof(char) * bufferSize);
       if(operator == '+'){
         output = strcat(value1, value2);
       }
       else{
         strcpy(output, "Invalid operator for strings.\n");
       }
-      free(key1);
-      free(key2);
       free(value1);
       free(value2);
+      free(key1);
+      free(key2);
       return output;
     }
     else{
@@ -202,8 +203,8 @@ void freeData(struct Section* data, int dataLength){
   for(int i = 0; i < dataLength; i++){
     free(data[i].sectionName);
     for(int j = 0; j < data[i].numTuples; j++){
-      free(data[i].arrayOfTuples[j].key);
       free(data[i].arrayOfTuples[j].value);
+      free(data[i].arrayOfTuples[j].key);
     }
     free(data[i].arrayOfTuples);
   }
