@@ -147,7 +147,7 @@ char *evaluate(struct Section* data, int dataLength, char* expression){
       char* stopStr;
       long long num1 = strtoll(value1, &stopStr, 10);
       long long num2 = strtoll(value2, &stopStr, 10);
-      char* output = malloc(sizeof(char) * 256);
+      char* output = malloc(sizeof(char) * 128);
       switch (operator)
       {
       case '+':
@@ -223,12 +223,16 @@ int main(int argc, char *argv[])
       continue;
     }
     if(expressionFlag == 0){
-      printf("Value: %s\n", getValue(data, *dataLength, argv[i]));
+      char* result = getValue(data, *dataLength, argv[i]);
+      printf("Value: %s\n", result);
+      free(result);
     }
     else if(expressionFlag == 1){
+      char* result = evaluate(data, *dataLength, argv[i]);
       printf("Evaluating: %s\n", argv[i]);
-      printf("Value of expression: %s\n", evaluate(data, *dataLength, argv[i]));
+      printf("Value of expression: %s\n", result);
       expressionFlag = 0;
+      free(result);
     }
   }
   freeData(data, *dataLength);
