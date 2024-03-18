@@ -176,7 +176,8 @@ char *evaluate(struct Section* data, int dataLength, char* expression){
       int bufferSize = (strlen(value1) + strlen(value2)) + 1 > 32 ? (strlen(value1) + strlen(value2)) : 32;
       char* output = malloc(sizeof(char) * bufferSize);
       if(operator == '+'){
-        output = strcat(value1, value2);
+        strcat(output, value1);
+        strcat(output, value2);
       }
       else{
         strcpy(output, "Invalid operator for strings.\n");
@@ -192,7 +193,9 @@ char *evaluate(struct Section* data, int dataLength, char* expression){
       free(value2);
       free(key1);
       free(key2);
-      return "Both values must be either strings or integers.\n";
+      char* output = malloc(sizeof(char) * 64);
+      strcpy(output, "Both values must be either strings or integers.\n");
+      return output;
     }
   }
   free(key1);
