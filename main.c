@@ -42,6 +42,31 @@ int isnumber(char* str){
   return 1;
 }
 
+char* readline(FILE* file){
+  int bufferSize = 32;
+  char* buffer = malloc(sizeof(char) * bufferSize);
+  int position = 0;
+  char c;
+
+  while(1){
+    c = fgetc(file);
+
+    if(c == EOF || c == '\n'){
+      buffer[position] = '\0';
+      return buffer;
+    }
+    else{
+      buffer[position] = c;
+    }
+    position++;
+
+    if(position >= bufferSize){
+      bufferSize *= 2;
+      buffer = realloc(buffer, sizeof(char) * bufferSize);
+    }
+  }
+}
+
 struct Section *parseFile(char *filename, int* dataLength)
 {
   int sectionIndex = 0;
@@ -59,7 +84,7 @@ struct Section *parseFile(char *filename, int* dataLength)
     exit(EXIT_FAILURE);
   }
 
-  while (getline(&line, &len, file) != -1)
+  while (getline(&line, &len, file) != NULL)
   {
     currentKey = malloc(sizeof(char) * len);
     currentValue = malloc(sizeof(char) * len);
