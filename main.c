@@ -42,29 +42,29 @@ int isnumber(char* str){
   return 1;
 }
 
-char* readline(FILE* file){
-  int bufferSize = 32;
-  char* buffer = malloc(sizeof(char) * bufferSize);
-  int position = 0;
-  char c;
+char* readline(FILE *file, size_t* size) {
+    int capacity = 32;
+    int currentLength = 0;
+    char* buffer = malloc(sizeof(char) * capacity);
+    char c;
 
-  while(1){
-    c = fgetc(file);
+    while ((c = fgetc(file)) != EOF && c != '\n') {
+        if (currentLength + 1 >= capacity) {
+            capacity *= 2;
+            buffer = realloc(buffer, sizeof(char) * capacity);
+        }
+        buffer[currentLength] = c;
+        currentLength++;
+    }
 
-    if(c == EOF || c == '\n'){
-      buffer[position] = '\0';
-      return buffer;
+    if (currentLength == 0 && c == EOF) {
+        free(buffer);
+        return NULL;
     }
-    else{
-      buffer[position] = c;
-    }
-    position++;
 
-    if(position >= bufferSize){
-      bufferSize *= 2;
-      buffer = realloc(buffer, sizeof(char) * bufferSize);
-    }
-  }
+    buffer[currentLength] = '\0';
+    *size = sizeof(char) * currentLength;
+    return buffer;
 }
 
 struct Section *parseFile(char *filename, int* dataLength)
@@ -83,8 +83,7 @@ struct Section *parseFile(char *filename, int* dataLength)
     printf("File opening error.\n");
     exit(EXIT_FAILURE);
   }
-
-  while (getline(&line, &len, file) != NULL)
+  while ((line = readline(file, &len)) != NULL)
   {
     currentKey = malloc(sizeof(char) * len);
     currentValue = malloc(sizeof(char) * len);
@@ -127,6 +126,7 @@ struct Section *parseFile(char *filename, int* dataLength)
     free(currentKey);
     free(currentValue);
     free(currentSectionName);
+    free(line);
     *dataLength = sectionIndex;
   }
 
