@@ -4,6 +4,8 @@
 #include <ctype.h>
 
 
+// AUTHORS: Kacper Kuźnik 160299, Piotr Foltyniewicz 160295
+
 struct Tuple
 {
   char *key;
